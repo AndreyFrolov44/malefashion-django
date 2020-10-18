@@ -12,6 +12,14 @@ class ImageInline(GenericTabularInline):
     model = ProductImage
 
 
+class ProductSizeQuantityInline(GenericTabularInline):
+    model = ProductSizeQuantity
+
+
+# class RelatedProductInline(GenericTabularInline):
+#     model = RelatedProduct
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -24,22 +32,33 @@ class BrandAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'category', 'brand', 'quantity', 'available',)
-    list_editable = ('price', 'category', 'brand', 'quantity', 'available',)
+    list_display = ('name', 'price', 'sale', 'category', 'brand', 'available',)
+    list_editable = ('price', 'sale', 'category', 'brand', 'available',)
     fields = (
         'name',
-        ('price', 'category', 'brand',),
+        ('price', 'sale', 'category', 'brand',),
         'description_lite',
         'description',
         'additional_information',
-        ('quantity', 'available',),
+        'image',
+        'tags',
+        'related_products',
+        'available',
         'slug',
     )
     inlines = [
-        CommentInline,
         ImageInline,
+        ProductSizeQuantityInline,
+        # RelatedProductInline,
+        CommentInline,
     ]
     prepopulated_fields = {'slug': ('name',)}
 
@@ -47,6 +66,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductSize)
 class ProductSizeAdmin(admin.ModelAdmin):
     list_display = ('value',)
+    prepopulated_fields = {'slug': ('value',)}
 
 
 @admin.register(RatingStar)
@@ -57,11 +77,6 @@ class RatingStarAdmin(admin.ModelAdmin):
 @admin.register(Rating)
 class RatingStarAdmin(admin.ModelAdmin):
     list_display = ('ip', 'star', 'product',)
-
-
-@admin.register(RelatedProduct)
-class RatingStarAdmin(admin.ModelAdmin):
-    list_display = ('product', 'related',)
 
 
 @admin.register(Article)

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=70)
-    slug = models.SlugField(max_length=70)
+    slug = models.SlugField(max_length=70, unique=True)
 
     def __str__(self):
         return self.name
@@ -14,7 +14,7 @@ class Category(models.Model):
 
 class Brand(models.Model):
     name = models.CharField(max_length=70)
-    slug = models.SlugField(max_length=70)
+    slug = models.SlugField(max_length=70, unique=True)
 
     def __str__(self):
         return self.name
@@ -23,14 +23,25 @@ class Brand(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=7, decimal_places=2)
+    sale = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     description_lite = models.TextField()
     description = models.TextField()
     additional_information = models.TextField()
-    quantity = models.PositiveIntegerField()
+    image = models.ImageField(upload_to='product')
+    tags = models.ManyToManyField('Tag', blank=True, related_name='products')
     available = models.BooleanField(default=True)
-    slug = models.SlugField(max_length=210)
+    slug = models.SlugField(max_length=210, unique=True)
+    related_products = models.ManyToManyField('self', blank=True, related_name='related_products')
+
+    def __str__(self):
+        return self.name
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=70)
+    slug = models.SlugField(max_length=80, unique=True)
 
     def __str__(self):
         return self.name
@@ -43,14 +54,26 @@ class ProductImage(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
-        return self.product
+        return '{}'.format(self.content_type)
 
 
 class ProductSize(models.Model):
     value = models.CharField(max_length=3, unique=True)
+    slug = models.SlugField(max_length=6, unique=True)
 
     def __str__(self):
         return self.value
+
+
+class ProductSizeQuantity(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    size = models.ForeignKey(ProductSize, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return '{}'.format(self.content_type)
 
 
 class RatingStar(models.Model):
@@ -69,20 +92,12 @@ class Rating(models.Model):
         return self.product
 
 
-class RelatedProduct(models.Model):
-    product = models.OneToOneField(Product, on_delete=models.CASCADE)
-    related = models.ForeignKey(Product, on_delete=models.CharField, related_name='related')
-
-    def __str__(self):
-        return self.product
-
-
 class Article(models.Model):
     title = models.CharField(max_length=200)
     text = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
-    slug = models.SlugField(max_length=210)
+    slug = models.SlugField(max_length=210, unique=True)
     draft = models.BooleanField(default=False)
 
     def __str__(self):
@@ -98,4 +113,5 @@ class Comment(models.Model):
     date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.content_type
+        return '{}'.format(self.content_type)
+
