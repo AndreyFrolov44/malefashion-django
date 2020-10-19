@@ -16,10 +16,6 @@ class ProductSizeQuantityInline(GenericTabularInline):
     model = ProductSizeQuantity
 
 
-# class RelatedProductInline(GenericTabularInline):
-#     model = RelatedProduct
-
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -57,7 +53,6 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [
         ImageInline,
         ProductSizeQuantityInline,
-        # RelatedProductInline,
         CommentInline,
     ]
     prepopulated_fields = {'slug': ('name',)}
@@ -81,7 +76,8 @@ class RatingStarAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class RatingStarAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'date',)
+    list_display = ('title', 'author', 'date', 'draft',)
+    list_editable = ('draft',)
     inlines = [
         CommentInline,
     ]
